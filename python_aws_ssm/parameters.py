@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union, Any
+from typing import Any, Dict, List, Optional, Union
 
 import boto3
 
@@ -85,4 +85,3 @@ class ParameterStore:
             return {
                 key: ParameterStore._deep_merge(a.get(key), b.get(key)) for key in keys
             }
-
