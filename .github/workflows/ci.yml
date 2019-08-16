@@ -7,6 +7,7 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+    - name: Git checkout
     - uses: actions/checkout@v1
     - name: Set up Python 3.7
       uses: actions/setup-python@v1
@@ -25,10 +26,11 @@ jobs:
     - name: Test with pytest
       run: |
         poetry run pytest --cov=./ --cov-report=xml
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1.0.0
-      with:
-        token: ${{secrets.CODECOV_TOKEN}}
-        file: ./coverage.xml
-        flags: unittests
-        name: python-aws-ssm
+    # NOTE: Disabled for now
+    # - name: Upload coverage to Codecov
+    #   uses: codecov/codecov-action@v1.0.0
+    #   with:
+    #     token: ${{secrets.CODECOV_TOKEN}}
+    #     file: ./coverage.xml
+    #     flags: unittests
+    #     name: python-aws-ssm
