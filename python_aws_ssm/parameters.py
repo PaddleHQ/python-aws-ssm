@@ -76,7 +76,7 @@ class ParameterStore:
         return tree_dict
 
     @staticmethod
-    def _deep_merge(a, b):
+    def _deep_merge(a: Union[Dict, Any], b: Union[Dict, Any]) -> Union[Dict, Any]:
         # NOTE: Thanks to: https://stackoverflow.com/a/56177639/9563578
         if not isinstance(a, dict) or not isinstance(b, dict):
             return a if b is None else b
