@@ -1,9 +1,17 @@
 [tool.poetry]
 name = "python-aws-ssm"
 version = "0.1.0"
-description = ""
+description = "Python package that interfaces with AWS System Manager"
 authors = ["Luca Valentini <luca@paddle.com>"]
-
+# New attributes
+license = "Apache License 2.0"
+readme = "README.md"
+homepage = "https://github.com/PaddleHQ/python-aws-ssm"
+repository = "https://github.com/PaddleHQ/python-aws-ssm"
+keywords = ["python", "aws", "ssm"]
+include = [
+    "LICENSE",
+]
 [tool.poetry.dependencies]
 python = "^3.7"
 boto3 = "^1.9"
