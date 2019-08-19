@@ -27,11 +27,9 @@ jobs:
       run: |
         poetry run pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
-      run: echo "Codecov disabled"
-      # NOTE: Disabled for now
-      #   uses: codecov/codecov-action@v1.0.0
-      #   with:
-      #     token: ${{secrets.CODECOV_TOKEN}}
-      #     file: ./coverage.xml
-      #     flags: unittests
-      #     name: python-aws-ssm
+      uses: codecov/codecov-action@v1.0.0
+      with:
+        token: ${{secrets.CODECOV_TOKEN}}
+        file: ./coverage.xml
+        flags: unittests
+        name: python-aws-ssm
