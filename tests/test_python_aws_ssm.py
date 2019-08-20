@@ -1,8 +1,8 @@
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from aws_ssm import __version__
-from aws_ssm.parameters import ParameterStore
+from python_aws_ssm import __version__
+from python_aws_ssm.parameters import ParameterStore
 
 
 def test_version():
@@ -30,7 +30,11 @@ class TestGetParameters(TestCase):
         )
 
         self.assertEqual(
-            {"foo_ssm_key_1": "foo_ssm_value_1", "foo_ssm_key_3": "foo_ssm_value_3"},
+            {
+                "foo_ssm_key_1": "foo_ssm_value_1",
+                "foo_ssm_key_2": None,
+                "foo_ssm_key_3": "foo_ssm_value_3",
+            },
             secrets,
         )
 

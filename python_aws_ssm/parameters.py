@@ -24,11 +24,14 @@ class ParameterStore:
         ).get("Parameters")
 
         # Initialise the result so that missing keys have a None value.
-        filled_parameters = {parameter_name: None for parameter_name in ssm_key_names}
+        filled_parameters: Dict[str, Optional[str]] = {
+            parameter_name: None for parameter_name in ssm_key_names
+        }
 
         # Merge the retrieved parameters in.
         for retrieved in retrieved_parameters:
-            filled_parameters[retrieved.get("Name")] = retrieved.get("Value")
+            if retrieved.get("Name") in ssm_key_names:
+                filled_parameters[retrieved.get("Name")] = retrieved.get("Value")
 
         return filled_parameters
 
@@ -41,7 +44,7 @@ class ParameterStore:
     ) -> Dict[str, Union[Dict, Optional[str]]]:
         """
         Retrieve all the keys under a certain path on SSM.
-        * When recursive is set to False, SSM doesn't return parameters under a nested path.
+        * When recursive is set to False, SSM doesn't return keys under a nested path.
             e.g.: /{ssm_base_path}/foo/bar will not return 'bar' nor '/foo/bar'.
         * When recursive and nested are set to True, a nested dictionary is returned.
             e.g.: /{ssm_base_path}/foo/bar will return {"foo": {"bar": "value"}}
@@ -64,14 +67,16 @@ class ParameterStore:
 
         return (
             # Non-nested is the default behaviour (hence `else parameters`).
-            self._parse_parameters(parameters) if recursive and nested else parameters
+            self._parse_parameters(parameters)
+            if recursive and nested
+            else parameters
         )
 
     @staticmethod
     def _parse_parameters(
         parameters: Dict[str, Optional[str]]
     ) -> Dict[str, Union[Dict, Optional[str]]]:
-        parsed_dict: Dict[Union[Dict, str], Optional[Union[Dict, str]]] = {}
+        parsed_dict: Dict[str, Union[Dict, Optional[str]]] = {}
         for key, value in parameters.items():
             nested_dict = ParameterStore._tree_dict(key.split("/"), value)
             parsed_dict = ParameterStore._deep_merge(parsed_dict, nested_dict)
