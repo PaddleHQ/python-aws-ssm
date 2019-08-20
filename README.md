@@ -97,5 +97,32 @@ parameters = parameter_store.get_parameters(["/service/path/"])
 
 If you are missing any features or have found a bug, please open a PR or a new Github issue.
 
-TODO:
-* How to run tests?
+
+#### Setup
+This project uses Poetry to manage the dependencies and the virtual environment.
+Follow the instructions from Poetry website (https://poetry.eustace.io/docs/#installation) to configure your local environment.
+
+After completing the Poetry setup, the virtual environment can be created running:
+```shell
+make setup
+```
+
+#### Tests
+Tests are run by Pytest
+```shell
+make test
+```
+
+#### Code style
+- Mypy is used for type annotations (https://github.com/python/mypy)
+- Black formatter (https://github.com/psf/black) is used to keep the coding style consistent.
+- Isort (https://github.com/timothycrosley/isort) is used to sort the imports.
+To format the codebase just run:
+```shell
+make format
+```
+and to check it before pushing:
+```shell
+make lint
+```
+
