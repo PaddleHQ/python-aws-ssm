@@ -1,4 +1,3 @@
-
 .PHONY: setup
 setup: ## Create a virtual environment for the project and installs all dependencies
 	poetry install
@@ -17,7 +16,7 @@ lint: ## Check the .py files with Mypy, Flake8 and Black
 
 .PHONY: tests
 tests: ## Run tests with pytest and create the coverage report
-	poetry run pytest --cov=./ --cov-report=xml
+	PYTHONPATH=${PYTHONPATH}:. poetry run pytest --cov=./ --cov-report=xml
 
 .SILENT: help
 help: ## Shows all available commands
