@@ -21,7 +21,7 @@ your own services being rate-limited in turn.
 
 ## Install
 ```bash
-pip install python-aws-ssm
+pip install aws-ssm
 ```
 
 ## Examples
