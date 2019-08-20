@@ -19,14 +19,18 @@ class ParameterStore:
         returned in the result dict.
         """
 
-        parameters = self.client.get_parameters(
+        retrieved_parameters = self.client.get_parameters(
             Names=ssm_key_names, WithDecryption=True
         ).get("Parameters")
-        return {
-            parameter.get("Name"): parameter.get("Value")
-            for parameter in parameters
-            if parameter.get("Name") in ssm_key_names
-        }
+
+        # Initialise the result so that missing keys have a None value.
+        filled_parameters = {parameter_name: None for parameter_name in ssm_key_names}
+
+        # Merge the retrieved parameters in.
+        for retrieved in retrieved_parameters:
+            filled_parameters[retrieved.get("Name")] = retrieved.get("Value")
+
+        return filled_parameters
 
     def get_parameters_by_path(
         self,
