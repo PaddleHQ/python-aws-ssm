@@ -6,8 +6,8 @@
 # python-aws-ssm
 Python package that interfaces with [AWS System Manager](https://www.amazonaws.cn/en/systems-manager/).
 
-## Why to use python-aws-ssm and not the aws-sdk-go?
-This package is wrapping the aws-sdk-go and hides the complexity dealing with the not so Python friendly AWS SDK.
+## Why to use python-aws-ssm and not the boto3 SSM client?
+This package is wrapping boto3 SSM client and hides the complexity dealing with the not so Python friendly AWS SDK.
 Perfect use case for this package is when secure parameters for an application are stored to
 [AWS Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
 using a path hierarchy. During application startup you can use this package to fetch them and use them in your application.
