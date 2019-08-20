@@ -38,7 +38,7 @@ class ParameterStore:
         with_decryption: bool = True,
         recursive: bool = False,
         nested: bool = False,
-    ) -> Dict[str, Optional[str]]:
+    ) -> Dict[str, Union[Dict, Optional[str]]]:
         """
         Retrieve all the keys under a certain path on SSM.
         * When recursive is set to False, SSM doesn't return parameters under a nested path.
@@ -47,6 +47,10 @@ class ParameterStore:
             e.g.: /{ssm_base_path}/foo/bar will return {"foo": {"bar": "value"}}
         * When nested is set to False, the full subpath is returned as key.
             e.g.: /{ssm_base_path}/foo/bar will return {"foo/bar": "value"}}}
+
+        :return If nested=False, a dictionary of string to optional string value.
+         If nested=True, a dictionary of string to potentially nested dictionaries with
+         optional string values.
         """
 
         parameters = self.client.get_parameters_by_path(
@@ -66,7 +70,7 @@ class ParameterStore:
     @staticmethod
     def _parse_parameters(
         parameters: Dict[str, Optional[str]]
-    ) -> Dict[str, Optional[str]]:
+    ) -> Dict[str, Union[Dict, Optional[str]]]:
         parsed_dict: Dict[Union[Dict, str], Optional[Union[Dict, str]]] = {}
         for key, value in parameters.items():
             nested_dict = ParameterStore._tree_dict(key.split("/"), value)
