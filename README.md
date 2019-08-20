@@ -78,6 +78,21 @@ dev_parameters = parameters.get("/common/dev/param-2")
 # value should be `b`
 ```
 
+#### With custom client
+
+```python
+from aws_ssm.parameters import ParameterStore
+import boto3
+
+# Initialise an SSM client to specify the source of the credentials.
+# e.g. locally a profile would be more likely; an AWS Lambda would most
+# likely not override the credentials source.
+ssm_client = boto3.Session(profile_name='dev').client('ssm')
+parameter_store = ParameterStore(ssm_client)
+
+parameters = parameter_store.get_parameters(["/service/path/"])
+```
+
 ## Development
 
 If you are missing any features or have found a bug, please open a PR or a new Github issue.
