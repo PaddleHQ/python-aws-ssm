@@ -22,7 +22,7 @@ pip install python-aws-ssm
 #### Basic Usage
 
 ```python
-from python_aws_ssm.parameters import ParameterStore
+from aws_ssm.parameters import ParameterStore
 
 # Assuming you have the parameters in the following format:
 # my-service/dev/param-1  -> with value `a`
@@ -38,7 +38,7 @@ value = parameters.get("param-1")
 #### Recursive and nested options
 
 ```python
-from python_aws_ssm.parameters import ParameterStore
+from aws_ssm.parameters import ParameterStore
 
 # Assuming you have the parameters in the following format:
 # my-service/dev/param-1  -> with value `a`
@@ -56,7 +56,7 @@ dev_parameters = parameters.get("dev")
 #### Get parameters by name
 
 ```python
-from python_aws_ssm.parameters import ParameterStore
+from aws_ssm.parameters import ParameterStore
 
 # Assuming you have the parameters in the following format:
 # my-service/dev/param-1  -> with value `a`

@@ -1,8 +1,8 @@
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from python_aws_ssm import __version__
-from python_aws_ssm.parameters import ParameterStore
+from aws_ssm import __version__
+from aws_ssm.parameters import ParameterStore
 
 
 def test_version():
