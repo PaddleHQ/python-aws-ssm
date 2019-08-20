@@ -12,6 +12,13 @@ Perfect use case for this package is when secure parameters for an application a
 [AWS Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
 using a path hierarchy. During application startup you can use this package to fetch them and use them in your application.
 
+## Warning
+
+The SSM service is rate-limited by default. We strongly suggest using
+retrieving SSM keys by path, e.g. via `ParameterStore.get_parameters_by_path()`.
+This requires grouping keys by a useful path but reduces the chance of
+your own services being rate-limited in turn.
+
 ## Install
 ```bash
 pip install python-aws-ssm
@@ -70,3 +77,10 @@ parameters = parameter_store.get_parameters(
 dev_parameters = parameters.get("/common/dev/param-2")
 # value should be `b`
 ```
+
+## Development
+
+If you are missing any features or have found a bug, please open a PR or a new Github issue.
+
+TODO:
+* How to run tests?
