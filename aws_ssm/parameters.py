@@ -41,7 +41,7 @@ class ParameterStore:
     ) -> Dict[str, Optional[str]]:
         """
         Retrieve all the keys under a certain path on SSM.
-        * Wnen recursive is set to False, SSM doesn't parameters under a nested path.
+        * When recursive is set to False, SSM doesn't return parameters under a nested path.
             e.g.: /{ssm_base_path}/foo/bar will not return 'bar' nor '/foo/bar'.
         * When recursive and nested are set to True, a nested dictionary is returned.
             e.g.: /{ssm_base_path}/foo/bar will return {"foo": {"bar": "value"}}
@@ -59,13 +59,14 @@ class ParameterStore:
         }
 
         return (
+            # Non-nested is the default behaviour (hence `else parameters`).
             self._parse_parameters(parameters) if recursive and nested else parameters
         )
 
     @staticmethod
     def _parse_parameters(
         parameters: Dict[str, Optional[str]]
-    ) -> Dict[Union[Dict, str], Optional[Union[Dict, str]]]:
+    ) -> Dict[str, Optional[str]]:
         parsed_dict: Dict[Union[Dict, str], Optional[Union[Dict, str]]] = {}
         for key, value in parameters.items():
             nested_dict = ParameterStore._tree_dict(key.split("/"), value)
@@ -74,6 +75,11 @@ class ParameterStore:
 
     @staticmethod
     def _tree_dict(key_list: List[Any], value: Optional[Any]) -> Dict[Any, Any]:
+        """
+        Build a nested dictionary path from a list of keys and a value.
+        For example:
+            _tree_dict(["foo", "bar", "koo"], 42) ==> {"foo": {"bar": {"koo": 42}}}
+        """
         tree_dict: Dict[Any, Any] = {key_list[-1]: value}
         for key in reversed(key_list[:-1]):
             tree_dict = {key: tree_dict}
