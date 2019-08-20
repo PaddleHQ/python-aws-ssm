@@ -1,3 +1,8 @@
+
+.PHONY: setup
+setup: ## Create a virtual environment for the project and installs all dependencies
+	poetry install
+
 .PHONY: format
 format: ## Automatically format the .py files with Black and Isort
 	poetry run isort --recursive .
