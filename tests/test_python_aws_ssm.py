@@ -30,7 +30,11 @@ class TestGetParameters(TestCase):
         )
 
         self.assertEqual(
-            {"foo_ssm_key_1": "foo_ssm_value_1", "foo_ssm_key_3": "foo_ssm_value_3"},
+            {
+                "foo_ssm_key_1": "foo_ssm_value_1",
+                "foo_ssm_key_2": None,
+                "foo_ssm_key_3": "foo_ssm_value_3",
+            },
             secrets,
         )
 

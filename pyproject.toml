@@ -2,9 +2,9 @@
 name = "python-aws-ssm"
 version = "0.1.0"
 description = "Python package that interfaces with AWS System Manager"
-authors = ["Luca Valentini <luca@paddle.com>"]
+authors = ["Luca Valentini <luca@paddle.com>", "Maarten Jacobs <maarten@paddle.com>"]
 # New attributes
-license = "Apache License 2.0"
+license = "Apache-2.0"
 readme = "README.md"
 homepage = "https://github.com/PaddleHQ/python-aws-ssm"
 repository = "https://github.com/PaddleHQ/python-aws-ssm"

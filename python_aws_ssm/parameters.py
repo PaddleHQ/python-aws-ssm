@@ -19,14 +19,21 @@ class ParameterStore:
         returned in the result dict.
         """
 
-        parameters = self.client.get_parameters(
+        retrieved_parameters = self.client.get_parameters(
             Names=ssm_key_names, WithDecryption=True
         ).get("Parameters")
-        return {
-            parameter.get("Name"): parameter.get("Value")
-            for parameter in parameters
-            if parameter.get("Name") in ssm_key_names
+
+        # Initialise the result so that missing keys have a None value.
+        filled_parameters: Dict[str, Optional[str]] = {
+            parameter_name: None for parameter_name in ssm_key_names
         }
+
+        # Merge the retrieved parameters in.
+        for retrieved in retrieved_parameters:
+            if retrieved.get("Name") in ssm_key_names:
+                filled_parameters[retrieved.get("Name")] = retrieved.get("Value")
+
+        return filled_parameters
 
     def get_parameters_by_path(
         self,
@@ -34,15 +41,19 @@ class ParameterStore:
         with_decryption: bool = True,
         recursive: bool = False,
         nested: bool = False,
-    ) -> Dict[str, Optional[str]]:
+    ) -> Dict[str, Union[Dict, Optional[str]]]:
         """
         Retrieve all the keys under a certain path on SSM.
-        * Wnen recursive is set to False, SSM doesn't parameters under a nested path.
+        * When recursive is set to False, SSM doesn't return keys under a nested path.
             e.g.: /{ssm_base_path}/foo/bar will not return 'bar' nor '/foo/bar'.
         * When recursive and nested are set to True, a nested dictionary is returned.
             e.g.: /{ssm_base_path}/foo/bar will return {"foo": {"bar": "value"}}
         * When nested is set to False, the full subpath is returned as key.
             e.g.: /{ssm_base_path}/foo/bar will return {"foo/bar": "value"}}}
+
+        :return If nested=False, a dictionary of string to optional string value.
+         If nested=True, a dictionary of string to potentially nested dictionaries with
+         optional string values.
         """
 
         parameters = self.client.get_parameters_by_path(
@@ -55,14 +66,17 @@ class ParameterStore:
         }
 
         return (
-            self._parse_parameters(parameters) if recursive and nested else parameters
+            # Non-nested is the default behaviour (hence `else parameters`).
+            self._parse_parameters(parameters)
+            if recursive and nested
+            else parameters
         )
 
     @staticmethod
     def _parse_parameters(
         parameters: Dict[str, Optional[str]]
-    ) -> Dict[Union[Dict, str], Optional[Union[Dict, str]]]:
-        parsed_dict: Dict[Union[Dict, str], Optional[Union[Dict, str]]] = {}
+    ) -> Dict[str, Union[Dict, Optional[str]]]:
+        parsed_dict: Dict[str, Union[Dict, Optional[str]]] = {}
         for key, value in parameters.items():
             nested_dict = ParameterStore._tree_dict(key.split("/"), value)
             parsed_dict = ParameterStore._deep_merge(parsed_dict, nested_dict)
@@ -70,6 +84,11 @@ class ParameterStore:
 
     @staticmethod
     def _tree_dict(key_list: List[Any], value: Optional[Any]) -> Dict[Any, Any]:
+        """
+        Build a nested dictionary path from a list of keys and a value.
+        For example:
+            _tree_dict(["foo", "bar", "koo"], 42) ==> {"foo": {"bar": {"koo": 42}}}
+        """
         tree_dict: Dict[Any, Any] = {key_list[-1]: value}
         for key in reversed(key_list[:-1]):
             tree_dict = {key: tree_dict}
