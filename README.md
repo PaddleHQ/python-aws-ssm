@@ -1,7 +1,7 @@
-[![Build Status](https://wdp9fww0r9.execute-api.us-west-2.amazonaws.com/production/badge/PaddleHQ/python-aws-ssm)](https://wdp9fww0r9.execute-api.us-west-2.amazonaws.com/production/results/PaddleHQ/python-aws-ssm)
+![build](https://action-badges.now.sh/PaddleHQ/python-aws-ssm)
 [![codecov](https://codecov.io/gh/PaddleHQ/python-aws-ssm/branch/master/graph/badge.svg)](https://codecov.io/gh/PaddleHQ/python-aws-ssm)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-<a href="https://github.com/ambv/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![codestyle](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 # python-aws-ssm
 Python package that interfaces with [AWS System Manager](https://www.amazonaws.cn/en/systems-manager/).
