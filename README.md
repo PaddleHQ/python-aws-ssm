@@ -1,13 +1,13 @@
-[![Build Status](https://wdp9fww0r9.execute-api.us-west-2.amazonaws.com/production/badge/PaddleHQ/python-aws-ssm)](https://wdp9fww0r9.execute-api.us-west-2.amazonaws.com/production/results/PaddleHQ/python-aws-ssm)
+![build](https://action-badges.now.sh/PaddleHQ/python-aws-ssm)
 [![codecov](https://codecov.io/gh/PaddleHQ/python-aws-ssm/branch/master/graph/badge.svg)](https://codecov.io/gh/PaddleHQ/python-aws-ssm)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-<a href="https://github.com/ambv/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![codestyle](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 # python-aws-ssm
 Python package that interfaces with [AWS System Manager](https://www.amazonaws.cn/en/systems-manager/).
 
-## Why to use python-aws-ssm and not the aws-sdk-go?
-This package is wrapping the aws-sdk-go and hides the complexity dealing with the not so Python friendly AWS SDK.
+## Why to use python-aws-ssm and not the boto3 SSM client?
+This package is wrapping boto3 SSM client and hides the complexity dealing with the not so Python friendly AWS SDK.
 Perfect use case for this package is when secure parameters for an application are stored to
 [AWS Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
 using a path hierarchy. During application startup you can use this package to fetch them and use them in your application.
