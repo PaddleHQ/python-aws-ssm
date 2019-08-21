@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "python-aws-ssm"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python package that interfaces with AWS System Manager"
 authors = ["Luca Valentini <luca@paddle.com>", "Maarten Jacobs <maarten@paddle.com>"]
 # New attributes
