@@ -6,7 +6,7 @@ from python_aws_ssm.parameters import ParameterStore
 
 
 def test_version():
-    assert __version__ == "0.1.0"
+    assert __version__ == "0.1.1"
 
 
 class TestGetParameters(TestCase):
