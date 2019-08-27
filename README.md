@@ -21,7 +21,7 @@ your own services being rate-limited in turn.
 
 ## Install
 ```bash
-pip install aws-ssm
+pip install python-aws-ssm
 ```
 
 ## Examples
@@ -29,7 +29,7 @@ pip install aws-ssm
 #### Basic Usage
 
 ```python
-from aws_ssm.parameters import ParameterStore
+from python_aws_ssm.parameters import ParameterStore
 
 # Assuming you have the parameters in the following format:
 # my-service/dev/param-1  -> with value `a`
@@ -45,7 +45,7 @@ value = parameters.get("param-1")
 #### Recursive and nested options
 
 ```python
-from aws_ssm.parameters import ParameterStore
+from python_aws_ssm.parameters import ParameterStore
 
 # Assuming you have the parameters in the following format:
 # my-service/dev/param-1  -> with value `a`
@@ -63,7 +63,7 @@ dev_parameters = parameters.get("dev")
 #### Get parameters by name
 
 ```python
-from aws_ssm.parameters import ParameterStore
+from python_aws_ssm.parameters import ParameterStore
 
 # Assuming you have the parameters in the following format:
 # my-service/dev/param-1  -> with value `a`
@@ -81,7 +81,7 @@ dev_parameters = parameters.get("/common/dev/param-2")
 #### With custom client
 
 ```python
-from aws_ssm.parameters import ParameterStore
+from python_aws_ssm.parameters import ParameterStore
 import boto3
 
 # Initialise an SSM client to specify the source of the credentials.
