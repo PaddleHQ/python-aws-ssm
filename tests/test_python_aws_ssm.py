@@ -80,6 +80,35 @@ class TestGetParameters(TestCase):
             Path="/bar/env/", Recursive=False, WithDecryption=True
         )
 
+    def test_get_parameters_by_path_are_stripped_of_leading_slashes(self):
+        """
+        Leading slashes of parameters are stripped consistently.
+
+        When requesting parameters by a path that is not recursive and nested,
+        the leading slashes should be consistently stripped. In versions <= 0.1.2,
+        the leading slashes were not included if the parameter path ended in a
+        trailing slash, but not if the parameter path ended without a trailing
+        slash…
+        """
+        self.parameter_store.client.get_parameters_by_path.return_value = {
+            "Parameters": [
+                {"Name": "/bar/env/foo_ssm_key_1", "Value": "foo_ssm_value_1"},
+                {"Name": "/bar/env/foo_ssm_key_2", "Value": "foo_ssm_value_2"},
+            ]
+        }
+        # Note that the requested path has no trailing slash.
+        parameters_path = "/bar/env"
+        secrets = self.parameter_store.get_parameters_by_path(parameters_path)
+
+        self.assertEqual(
+            {"foo_ssm_key_1": "foo_ssm_value_1", "foo_ssm_key_2": "foo_ssm_value_2"},
+            secrets,
+        )
+
+        self.parameter_store.client.get_parameters_by_path.assert_called_once_with(
+            Path=parameters_path, Recursive=False, WithDecryption=True
+        )
+
     def test_get_parameters_by_path_recursive_not_nested(self):
         self.parameter_store.client.get_parameters_by_path.return_value = {
             "Parameters": [

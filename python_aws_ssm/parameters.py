@@ -92,7 +92,7 @@ class ParameterStore:
             # Non-nested is the default behaviour (hence `else parameters`).
             self._parse_parameters(parameters)
             if recursive and nested
-            else parameters
+            else self._strip_leading_slashes(parameters)
         )
 
     @staticmethod
@@ -104,6 +104,15 @@ class ParameterStore:
             nested_dict = ParameterStore._tree_dict(key.split("/"), value)
             parsed_dict = ParameterStore._deep_merge(parsed_dict, nested_dict)
         return parsed_dict
+
+    @staticmethod
+    def _strip_leading_slashes(
+        parameters: Dict[str, Optional[str]]
+    ) -> Dict[str, Union[Dict, Optional[str]]]:
+        return {
+            parameter_key.lstrip("/"): parameter_value
+            for parameter_key, parameter_value in parameters.items()
+        }
 
     @staticmethod
     def _tree_dict(key_list: List[Any], value: Optional[Any]) -> Dict[Any, Any]:
