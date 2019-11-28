@@ -1,6 +1,20 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 import boto3
+
+
+class MissingParameterError(Exception):
+    """
+    Raised when a parameter is missing from a path.
+    """
+
+    def __init__(
+        self, parameter_names: List[str], parameter_path: str, *args: object
+    ) -> None:
+        super().__init__(*args)
+        self.msg: str = f"Missing parameters {parameter_names} on path {parameter_path}"
+        self.parameter_names: List[str] = parameter_names
+        self.parameter_path: str = parameter_path
 
 
 class ParameterStore:
@@ -41,6 +55,7 @@ class ParameterStore:
         with_decryption: bool = True,
         recursive: bool = False,
         nested: bool = False,
+        required_parameters: Optional[Set[str]] = None,
     ) -> Dict[str, Union[Dict, Optional[str]]]:
         """
         Retrieve all the keys under a certain path on SSM.
@@ -51,6 +66,11 @@ class ParameterStore:
         * When nested is set to False, the full subpath is returned as key.
             e.g.: /{ssm_base_path}/foo/bar will return {"foo/bar": "value"}}}
 
+        :param: required_parameters: a set of required parameters. Before the parameters
+        are processed, we assert that the required parameters are returned on this path.
+        Note: we assert the parameters before transforming the parameters to a nested
+        structure. Provide paths in path format, e.g. "foo/bar" for "/path/sub/foo/bar",
+        to prevent your required path from being listed as missing.
         :return If nested=False, a dictionary of string to optional string value.
          If nested=True, a dictionary of string to potentially nested dictionaries with
          optional string values.
@@ -64,6 +84,9 @@ class ParameterStore:
             parameter.get("Name").replace(ssm_base_path, ""): parameter.get("Value")
             for parameter in parameters
         }
+
+        if required_parameters:
+            self._assert_required(required_parameters, parameters, ssm_base_path)
 
         return (
             # Non-nested is the default behaviour (hence `else parameters`).
@@ -104,3 +127,17 @@ class ParameterStore:
             return {
                 key: ParameterStore._deep_merge(a.get(key), b.get(key)) for key in keys
             }
+
+    @staticmethod
+    def _assert_required(
+        required_parameters: Set[str],
+        actual_parameters: Dict[str, Any],
+        parameter_path: str,
+    ) -> None:
+        missing_parameters: List[str] = [
+            parameter_name
+            for parameter_name in required_parameters
+            if parameter_name not in actual_parameters
+        ]
+        if missing_parameters:
+            raise MissingParameterError(missing_parameters, parameter_path)

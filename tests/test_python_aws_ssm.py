@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 
 from python_aws_ssm import __version__
-from python_aws_ssm.parameters import ParameterStore
+from python_aws_ssm.parameters import MissingParameterError, ParameterStore
 
 
 def test_version():
@@ -134,3 +134,53 @@ class TestGetParameters(TestCase):
 
         with self.assertRaises(Exception, msg="Unexpected AWS error!"):
             self.parameter_store.get_parameters_by_path(["/key"])
+
+    def test_get_required_parameters_by_path_can_be_asserted(self) -> None:
+        """
+        Required parameters that are missing from a path result in an error.
+        """
+
+        self.parameter_store.client.get_parameters_by_path.return_value = {
+            "Parameters": [
+                # Only one of the required parameters is returned.
+                {"Name": "/path/sub/key", "Value": "foo_ssm_value_1"},
+                {"Name": "/path/sub/key2", "Value": "foo_ssm_value_2"},
+            ]
+        }
+
+        expected_msg = "Missing parameters [baz, foo/bar] on path /path/sub/"
+        e: MissingParameterError
+        with self.assertRaises(MissingParameterError, msg=expected_msg) as e:
+            self.parameter_store.get_parameters_by_path(
+                "/path/sub/", required_parameters={"baz", "foo/bar", "key"}
+            )
+            assert e.parameter_path == "/path/sub/"
+            assert e.parameter_names == ["baz", "foo/bar"]
+
+    def test_required_parameters_by_path_are_checked_before_recursive_nested(self):
+        self.parameter_store.client.get_parameters_by_path.return_value = {
+            "Parameters": [
+                {"Name": "/bar/env/foo_ssm_key_1", "Value": "foo_ssm_value_1"},
+                {"Name": "/bar/env/foo_ssm_key_2", "Value": "foo_ssm_value_2"},
+            ]
+        }
+        secrets = self.parameter_store.get_parameters_by_path(
+            "/bar/",
+            recursive=True,
+            nested=True,
+            required_parameters={"env/foo_ssm_key_1", "env/foo_ssm_key_2"},
+        )
+
+        self.assertEqual(
+            {
+                "env": {
+                    "foo_ssm_key_1": "foo_ssm_value_1",
+                    "foo_ssm_key_2": "foo_ssm_value_2",
+                }
+            },
+            secrets,
+        )
+
+        self.parameter_store.client.get_parameters_by_path.assert_called_once_with(
+            Path="/bar/", Recursive=True, WithDecryption=True
+        )
