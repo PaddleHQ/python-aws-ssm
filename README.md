@@ -1,4 +1,4 @@
-![build](https://action-badges.now.sh/PaddleHQ/python-aws-ssm)
+[![Build Status](https://travis-ci.com/PaddleHQ/python-aws-ssm.svg?branch=master)](https://travis-ci.com/PaddleHQ/python-aws-ssm)
 [![codecov](https://codecov.io/gh/PaddleHQ/python-aws-ssm/branch/master/graph/badge.svg)](https://codecov.io/gh/PaddleHQ/python-aws-ssm)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![codestyle](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
