@@ -15,3 +15,6 @@ install:
 script:
   - make lint
   - make tests
+
+after_success:
+  - codecov
