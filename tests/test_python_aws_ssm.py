@@ -178,13 +178,12 @@ class TestGetParameters(TestCase):
         }
 
         expected_msg = "Missing parameters [baz, foo/bar] on path /path/sub/"
-        e: MissingParameterError
-        with self.assertRaises(MissingParameterError, msg=expected_msg) as e:
+        with self.assertRaises(MissingParameterError, msg=expected_msg) as exc_info:
             self.parameter_store.get_parameters_by_path(
                 "/path/sub/", required_parameters={"baz", "foo/bar", "key"}
             )
-            assert e.parameter_path == "/path/sub/"
-            assert e.parameter_names == ["baz", "foo/bar"]
+        assert exc_info.exception.parameter_path == "/path/sub/"
+        assert exc_info.exception.parameter_names == ["baz", "foo/bar"]
 
     def test_required_parameters_by_path_are_checked_before_recursive_nested(self):
         self.parameter_store.client.get_parameters_by_path.return_value = {
