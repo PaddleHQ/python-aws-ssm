@@ -1,4 +1,0 @@
-flags:
-  unittests:
-    paths:
-      - tests/
