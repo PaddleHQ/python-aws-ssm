@@ -42,6 +42,41 @@ value = parameters.get("param-1")
 # value should be `a`
 ```
 
+#### Required parameters on path
+
+Requesting parameters by path is efficient but comes with an additional
+burden of validation: clients typically expect a number of keys to be
+present, e.g. the path `/service/foo/db/` might be used to retrieve the
+database credentials including the host name at `/service/foo/db/hostname`.
+The onus of verifying that this key is present is by default on the client.
+
+To assert the presence of these keys automatically, pass a set of required
+parameters via the `parameters` keyword argument:
+
+```python
+from python_aws_ssm.parameters import ParameterStore, MissingParameterError
+
+# Assuming you have the following keys:
+#  * /service/foo/db/hostname
+#  * /service/foo/db/username
+#  * /service/foo/db/password
+#  * /service/foo/db/port
+#  * /service/foo/db/description
+parameter_store = ParameterStore()
+# Requesting the base path but asserting presence of required parameters
+try:
+    parameters = parameter_store.get_parameters_by_path(
+            "/service/foo/db/",
+            required_parameters={"hostname", "username", "password", "port"}
+        )
+except MissingParameterError as e:
+    # Report on the missing parameters.
+    print(e.msg)
+else:
+    # Use the parameters, knowing that they exist.
+    print(parameters['hostname'])  # guaranteed to exist.
+```
+
 #### Recursive and nested options
 
 ```python
