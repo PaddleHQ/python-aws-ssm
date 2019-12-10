@@ -2,7 +2,11 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 
 from python_aws_ssm import __version__
-from python_aws_ssm.parameters import MissingParameterError, ParameterStore
+from python_aws_ssm.parameters import (
+    InvalidParametersError,
+    MissingParameterError,
+    ParameterStore,
+)
 
 
 def test_version():
@@ -183,7 +187,8 @@ class TestGetParameters(TestCase):
                 "/path/sub/", required_parameters={"baz", "foo/bar", "key"}
             )
         assert exc_info.exception.parameter_path == "/path/sub/"
-        assert exc_info.exception.parameter_names == ["baz", "foo/bar"]
+        assert len(exc_info.exception.parameter_names) == 2
+        assert sorted(exc_info.exception.parameter_names) == sorted(["baz", "foo/bar"])
 
     def test_required_parameters_by_path_are_checked_before_recursive_nested(self):
         self.parameter_store.client.get_parameters_by_path.return_value = {
@@ -212,3 +217,16 @@ class TestGetParameters(TestCase):
         self.parameter_store.client.get_parameters_by_path.assert_called_once_with(
             Path="/bar/", Recursive=True, WithDecryption=True
         )
+
+    def test_requesting_invalid_parameters(self):
+        """Assert requesting invalid parameters results in an exception."""
+        self.parameter_store.client.get_parameters.return_value = {
+            "Parameters": [{"Name": "/test/foo", "Value": "foo_ssm_value_1"}],
+            "InvalidParameters": ["/test/bar"],
+        }
+
+        with self.assertRaises(
+            InvalidParametersError, msg='Invalid parameters ["/test/bar"] requested'
+        ) as exc_info:
+            self.parameter_store.get_parameters(["/test/foo", "/test/bar"])
+        assert exc_info.exception.invalid_parameters == ["/test/bar"]
