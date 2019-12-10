@@ -48,10 +48,7 @@ class ParameterStore:
         response: Dict = self.client.get_parameters(
             Names=ssm_key_names, WithDecryption=True
         )
-        if (
-            response.get("InvalidParameters")
-            and type(response["InvalidParameters"]) is list
-        ):
+        if response.get("InvalidParameters"):
             raise InvalidParametersError(response["InvalidParameters"])
 
         retrieved_parameters: List[Dict] = response.get("Parameters", [])
