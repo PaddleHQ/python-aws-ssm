@@ -54,7 +54,7 @@ class ParameterStore:
         ):
             raise InvalidParametersError(response["InvalidParameters"])
 
-        retrieved_parameters = response.get("Parameters")
+        retrieved_parameters: List[Dict] = response.get("Parameters", [])
 
         # Initialise the result so that missing keys have a None value.
         filled_parameters: Dict[str, Optional[str]] = {
@@ -64,7 +64,7 @@ class ParameterStore:
         # Merge the retrieved parameters in.
         for retrieved in retrieved_parameters:
             if retrieved.get("Name") in ssm_key_names:
-                filled_parameters[retrieved.get("Name")] = retrieved.get("Value")
+                filled_parameters[retrieved["Name"]] = retrieved.get("Value")
 
         return filled_parameters
 
