@@ -17,6 +17,16 @@ class MissingParameterError(Exception):
         self.parameter_path: str = parameter_path
 
 
+class InvalidParametersError(Exception):
+    """
+    Raised when invalid parameters were required.
+    """
+
+    def __init__(self, invalid_parameters: List[str]) -> None:
+        self.invalid_parameters: List[str] = invalid_parameters
+        self.msg: str = f"Invalid parameters {self.invalid_parameters} requested"
+
+
 class ParameterStore:
     def __init__(self, client: Optional[boto3.client] = None):
         self.client = client or boto3.client("ssm")
@@ -31,11 +41,20 @@ class ParameterStore:
             have a matching value of None.
         If SSM somehow returns keys that are not requested, these keys are not
         returned in the result dict.
+
+        :raises: InvalidParametersError when invalid parameters were requested.
         """
 
-        retrieved_parameters = self.client.get_parameters(
+        response: Dict = self.client.get_parameters(
             Names=ssm_key_names, WithDecryption=True
-        ).get("Parameters")
+        )
+        if (
+            response.get("InvalidParameters")
+            and type(response["InvalidParameters"]) is list
+        ):
+            raise InvalidParametersError(response["InvalidParameters"])
+
+        retrieved_parameters = response.get("Parameters")
 
         # Initialise the result so that missing keys have a None value.
         filled_parameters: Dict[str, Optional[str]] = {
