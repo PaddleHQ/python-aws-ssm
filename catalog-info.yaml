@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: python-aws-ssm
+  description: Python package that interfaces with AWS System Manager.
+  tags:
+    - Python
+spec:
+  type: library
+  owner: engineering
+  lifecycle: production 
