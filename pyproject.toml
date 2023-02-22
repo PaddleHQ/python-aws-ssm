@@ -31,4 +31,4 @@ requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry.scripts]
-cli = 'python_aws_ssm.cli:cli'
+aws-ssm = 'python_aws_ssm.cli:cli'

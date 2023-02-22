@@ -2,9 +2,8 @@ import click
 import logging
 import botocore
 import yaml
-from boto3 import exceptions
 from python_aws_ssm.parameters import ParameterStore
-from json import dumps, loads, decoder
+from json import dumps
 from sys import exit
 from pathlib import Path
 
@@ -31,8 +30,8 @@ def cli(debug):
     pass
 
 
-@cli.command()
-@click.option("--key", help="Key to get from SSM")
+@cli.command(no_args_is_help=True)
+@click.option("--key", required=True, help="Key to get from SSM")
 def get(key: str) -> None:
     """
     Retrieves the value of a key from SSM
@@ -42,14 +41,13 @@ def get(key: str) -> None:
     print(parameters[key])
 
 
-@cli.command()
-@click.option("--overwrite/--no-overwrite", default=False, prompt=False)
+@cli.command(no_args_is_help=True)
+@click.option("--overwrite/--no-overwrite", default=False, prompt=False,help="Defaults to --no-overwrite")
 @click.option(
     "--value", default=None, help="A string to be stored in SSM, limit of 4kb"
 )
 @click.option("--path", help="The name of the key where it will be stored")
 @click.argument("file", type=click.Path(exists=True), required=False)
-# @click.group
 @click.option(
     "--to-json",
     is_flag=True,
@@ -71,9 +69,8 @@ def put(
     """
     Stores a string value in a SSM path
 
-    Supports reading from a yaml file , convert it to json and strore it,
-    if a yaml node is specified then that node only will be stored
-
+    Supports reading from a yaml file , convert it to json and store the result.
+    if a yaml node is specified then the content of that node will be stored
     """
 
     if value:
