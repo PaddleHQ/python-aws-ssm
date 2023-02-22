@@ -1,13 +1,16 @@
 import click
 import logging
+import botocore
+import yaml
+from boto3 import exceptions
 from python_aws_ssm.parameters import ParameterStore
-from json import dumps
-from yaml import safe_load
-from os import exit
+from json import dumps, loads, decoder
+from sys import exit
 from pathlib import Path
 
 
 log = logging.getLogger()
+log.setLevel(logging.INFO)
 parameter_store = ParameterStore()
 
 
@@ -28,47 +31,28 @@ def cli(debug):
     pass
 
 
-@click.command()
-@click.option("--path", help="Path to get from SSM")
-@click.option("--key", prompt=False)
-@click.option(
-    "--recursive",
-    default=False,
-    prompt=False,
-    help="If true return a nested object with all keys value under the base path",
-)
-def get(path: str, key: str | None = None, recursive: bool = False) -> None:
+@cli.command()
+@click.option("--key", help="Key to get from SSM")
+def get(key: str) -> None:
     """
-    Retrieves a path and a key from the path or everything from the path
-    :param: required_parameters: path
-    :return if both path and key then return the key from the path
-    if only path is requested return everything from the path
-    returns json
+    Retrieves the value of a key from SSM
+    Returns the raw value
     """
-
-    # Requesting the base path
-    if path:
-        parameters = parameter_store.get_parameters_by_path(
-            ssm_base_path=path, recursive=recursive
-        )
-        if key:
-            # And return a specific key
-            value = parameters.get(key)
-            return dumps(value)
-    # Otherwise return the whole value
-    return dumps(parameters)
+    parameters = parameter_store.get_parameters(ssm_key_names=[key])
+    print(parameters[key])
 
 
-@click.command()
+@cli.command()
 @click.option("--overwrite/--no-overwrite", default=False, prompt=False)
 @click.option(
     "--value", default=None, help="A string to be stored in SSM, limit of 4kb"
 )
 @click.option("--path", help="The name of the key where it will be stored")
-@click.argument("file")
-@click.group
+@click.argument("file", type=click.Path(exists=True), required=False)
+# @click.group
 @click.option(
     "--to-json",
+    is_flag=True,
     default=False,
     prompt=False,
     help="Enables converting a YAML file to JSON, limit of 4kb",
@@ -76,47 +60,52 @@ def get(path: str, key: str | None = None, recursive: bool = False) -> None:
 @click.option(
     "--yaml-node", default=None, help="The name of a top level node that will be stored"
 )
-
 def put(
     value: str,
     path: str,
+    to_json: bool,
     yaml_node: str = None,
     overwrite: bool = False,
     file: str | None = None,
 ) -> str:
     """
     Stores a string value in a SSM path
+
     Supports reading from a yaml file , convert it to json and strore it,
     if a yaml node is specified then that node only will be stored
-    :param: required_parameters: path
-    :param str value
-    :param str yaml_node
-    :param bool overwrite
-    :param str file
-    :return Json response AWS
-    :TODO: add support for tags
+
     """
 
     if value:
         final_value = value
     elif file:
         logging.debug(f"Reading from file: {file}")
-        yaml_data = safe_load(Path(file).read_text())
+        final_value = Path(file).read_text()
+        # Convert YAML to dictionary and store a node
         if yaml_node:
             try:
-                final_value = yaml_data[yaml_node]
-                final_value = dumps(yaml_data)
+                dict_value = yaml.load(final_value, Loader=yaml.FullLoader)
+                final_value = dict_value[yaml_node]
             except KeyError:
                 logging.fatal(f"Yaml node {yaml_node} not found, exiting")
                 exit(-1)
+        if to_json:
+            final_value = dumps(final_value)
     else:
-        logging.fatal("Either a value or a file must be specified exiting")
+        logging.fatal("Either a value or a file must be specified, exiting")
         exit(-2)
 
-    ret = parameter_store.put_parameter(
-        path=path, value=final_value, overwrite=overwrite
-    )
-    return dumps(ret)
+    try:
+        ret = parameter_store.put_parameter(
+            path=path, value=final_value, overwrite=overwrite
+        )
+        print(f"{ret}")
+    except botocore.exceptions.ClientError as e:
+        if e.response["Error"]["Code"] == "ParameterAlreadyExists":
+            logging.fatal("The path used already exists as key in SSM, exiting")
+        else:
+            logging.fatal(f"Error returned: {e}")
+        exit(-3)
 
 
 cli.add_command(get)
