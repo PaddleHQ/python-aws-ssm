@@ -166,3 +166,23 @@ class ParameterStore:
         ]
         if missing_parameters:
             raise MissingParameterError(missing_parameters, parameter_path)
+
+    def put_parameter(
+        self,
+        path: str,
+        value: str,
+        overwrite: bool = False,
+        tags: Dict[str, str] = {},
+    ) -> Dict:
+        """
+        Stores a value in a path
+        :params required_parameters: path,value
+        """
+        return self.client.put_parameter(
+            Name=path,
+            Value=value,
+            Type="String",
+            Overwrite=overwrite,
+            Tags=tags,
+            Tier="Standard",
+        )
