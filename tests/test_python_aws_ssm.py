@@ -1,6 +1,8 @@
+import os
 from unittest import TestCase
-from unittest.mock import MagicMock
-
+from unittest.mock import MagicMock, patch
+from click.testing import CliRunner
+from python_aws_ssm.cli import cli
 from python_aws_ssm import __version__
 from python_aws_ssm.parameters import (
     InvalidParametersError,
@@ -13,12 +15,146 @@ def test_version():
     assert __version__ == "1.0.0"
 
 
+class TestCli(TestCase):
+    def setUp(self):
+        self.parameter_store = ParameterStore(client=MagicMock())
+        os.environ["AWS_ACCESS_KEY_ID"] = "testingtestingtesting"
+        os.environ["AWS_SECRET_ACCESS_KEY"] = "testingtesting"
+        os.environ["AWS_SESSION_TOKEN"] = "testingtesting"
+        os.environ["AWS_REGION"] = "eu-west-1"
+
+    def tearDown(self):
+        del os.environ["AWS_ACCESS_KEY_ID"]
+        del os.environ["AWS_SECRET_ACCESS_KEY"]
+        del os.environ["AWS_SESSION_TOKEN"]
+        del os.environ["AWS_REGION"]
+
+    def __mock_api_call(cls, operation_name: str, kwargs: dict) -> dict:
+        if operation_name == "GetParameters":
+            return cls.__generate_response_ssm_get_parameters()
+        if operation_name == "PutParameter":
+            return cls.__generate_response_ssm_put_parameters()
+
+    def __generate_response_ssm_get_parameters(self) -> dict:
+        return {
+            "InvalidParameters": [],
+            "Parameters": [
+                {
+                    "ARN": "arn:aws:ssm:eu-west-1:111111111111:parameter/my/test/8",
+                    "DataType": "text",
+                    "LastModifiedDate": 1.677065896099e9,
+                    "Name": "/my/test/8",
+                    "Type": "String",
+                    "Value": "TEST",
+                    "Version": 1,
+                }
+            ],
+        }
+
+    def __generate_response_ssm_put_parameters(self) -> dict:
+        return {"Tier": "Standard", "Version": 1}
+
+    def __generate_response_ssm_put_parameters_exists(
+        self, operation_name: str, kwargs: dict
+    ) -> dict:
+        return {
+            "__type": "ParameterAlreadyExists",
+            "message": "The parameter already exists. To overwrite this value, set the overwrite option in the request to true.",
+        }
+
+    def test_cli_get(self):
+        """
+        Test the get argument with a single key
+        """
+        with patch(
+            "botocore.client.BaseClient._make_api_call", new=self.__mock_api_call
+        ):
+            result = CliRunner().invoke(cli, ["get", "--key", "/my/test/8"])
+
+        print(result.__dict__)
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.stdout_bytes, b"TEST\n")
+
+    def test_cli_put_value(self):
+        """
+        Test the put argument with a single value
+        """
+        with patch(
+            "botocore.client.BaseClient._make_api_call", new=self.__mock_api_call
+        ):
+            result = CliRunner().invoke(
+                cli, ["put", "--value", "TEST", "--path", "/my/test/8"]
+            )
+
+        print(result.__dict__)
+        self.assertEqual(result.exit_code, 0)
+
+    def test_cli_put_value_exists(self):
+        """
+        Test the put argument with a single value
+        """
+        with patch(
+            "botocore.client.BaseClient._make_api_call",
+            new=self.__generate_response_ssm_put_parameters_exists,
+        ):
+            result = CliRunner().invoke(
+                cli, ["put", "--value", "TEST", "--path", "/my/test/8"]
+            )
+
+        print(result.__dict__)
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(
+            result.stdout_bytes,
+            b"{'__type': 'ParameterAlreadyExists', 'message': 'The parameter already exists. To overwrite this value, set the overwrite option in the request to true.'}\n",
+        )
+
+    
+    def test_cli_put_file(self):
+        """
+        Test the put argument with a single value
+        """
+        with patch(
+            "botocore.client.BaseClient._make_api_call"
+        ) as mocked:
+            mocked.return_value={"Tier": "Standard", "Version": 1}
+
+            result = CliRunner().invoke(
+                cli, ["put", "--path", "/my/test/8", "./projects.yaml"]
+            )
+            print(mocked.call_args)
+
+
+        print(result.__dict__)
+        self.assertEqual(result.exit_code, 1)
+
+
 class TestGetParameters(TestCase):
     def setUp(self):
         self.parameter_store = ParameterStore(client=MagicMock())
 
     def tearDown(self):
         pass
+
+    def test_put_parameter(self):
+        """
+        Test the put argument with a single value
+        """
+
+        self.parameter_store.client.put_parameter.return_value = {
+            "Tier": "Standard",
+            "Version": 1,
+        }
+
+        self.parameter_store.put_parameter(path="/test/path", value="TEST")
+
+        self.parameter_store.client.put_parameter.assert_called_once_with(
+            Name="/test/path",
+            Value="TEST",
+            Type="String",
+            Overwrite=False,
+            Tags=[],
+            Tier="Standard",
+        )
 
     def test_get_parameters_keys_are_mapped(self):
         self.parameter_store.client.get_parameters.return_value = {
