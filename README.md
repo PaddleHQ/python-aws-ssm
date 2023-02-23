@@ -161,3 +161,74 @@ and to check it before pushing:
 make lint
 ```
 
+### Using the library from the command line
+#### Build and install the package
+```bash
+$ poetry build
+Building python-aws-ssm (1.0.0)
+  - Building sdist
+  - Built python-aws-ssm-1.0.0.tar.gz
+  - Building wheel
+  - Built python_aws_ssm-1.0.0-py3-none-any.whl
+
+$ pip install dist/python_aws_ssm-1.0.0-py3-none-any.whl
+```
+
+#### Usage
+```
+$ aws-ssm-param
+Usage: aws-ssm-param [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --debug
+  --help   Show this message and exit.
+
+Commands:
+  get  Retrieves the value of a key from SSM Returns the raw value
+  put  Stores a string value in a SSM path
+```
+#### Put
+```
+$ aws-ssm-param put
+Usage: aws-ssm-param put [OPTIONS] [FILE]
+
+  Stores a string value in a SSM path
+
+  Supports reading from a yaml file , convert it to json and store the result.
+  if a yaml node is specified then the content of that node will be stored
+
+Options:
+  --overwrite / --no-overwrite  Defaults to --no-overwrite
+  --value TEXT                  A string to be stored in SSM, limit of 4kb
+  --path TEXT                   The name of the key where it will be stored
+  --to-json                     Enables converting a YAML file to JSON, limit
+                                of 4kb
+  --yaml-node TEXT              The name of a top level node that will be
+                                stored
+  --help                        Show this message and exit.
+  ```
+
+#### Get
+```
+$ aws-ssm-param get
+Usage: aws-ssm-param get [OPTIONS]
+
+  Retrieves the value of a key from SSM Returns the raw value
+
+Options:
+  --key TEXT  Key to get from SSM  [required]
+  --help      Show this message and exit.
+```
+
+#### Tree
+```
+aws-ssm-param tree
+Usage: aws-ssm-param tree [OPTIONS]
+
+  Retrieves all the keys and values under certain path 
+  Returns a json object in the format of {"keyN"="value"}
+
+Options:
+  --path TEXT  Path to traverse to get all values from  [required]
+  --help       Show this message and exit.
+```
