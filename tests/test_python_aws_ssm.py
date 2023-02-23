@@ -92,9 +92,7 @@ class TestCli(TestCase):
             new=self.__mock_api_call,
         ):
             result = CliRunner().invoke(cli, ["put", "--path", "/my/test/8"])
-
-        print(result.__dict__)
-        self.assertEqual(result.exit_code, -2)
+            self.assertEqual(result.exit_code, -2)
 
     def test_cli_put_value_exists(self):
         """
