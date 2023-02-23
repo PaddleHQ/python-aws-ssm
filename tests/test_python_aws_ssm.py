@@ -85,7 +85,7 @@ class TestCli(TestCase):
 
     def test_cli_put_no_value(self):
         """
-        Test the put argument with a single value
+        Test the put argument without a value
         """
         with patch(
             "botocore.client.BaseClient._make_api_call",
@@ -96,7 +96,7 @@ class TestCli(TestCase):
 
     def test_cli_put_value_exists(self):
         """
-        Test the put argument with a single value
+        Test the put argument with a single value in a path that already exists
         """
 
         def put_parameter_side_effect(**kwargs):
@@ -121,7 +121,7 @@ class TestCli(TestCase):
 
     def test_cli_put_file(self):
         """
-        Test the put argument with a single value
+        Test the put argument from a file
         """
         fixture = "./tests/fixtures/file.yaml"
         with patch("botocore.client.BaseClient._make_api_call") as mocked:
@@ -143,7 +143,7 @@ class TestCli(TestCase):
 
     def test_cli_put_file_node(self):
         """
-        Test the put argument with a file, converts it to json and only one node
+        Test the put argument from a file, converts it to json and only stores one node
         """
         fixture = "./tests/fixtures/file.yaml"
         with patch("botocore.client.BaseClient._make_api_call") as mocked:
@@ -184,7 +184,7 @@ class TestGetParameters(TestCase):
 
     def test_put_parameter(self):
         """
-        Test the put argument with a single value
+        Test the put parameter function with a single value
         """
 
         self.parameter_store.client.put_parameter.return_value = {
