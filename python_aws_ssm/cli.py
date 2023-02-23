@@ -3,7 +3,7 @@ import logging
 import botocore
 import yaml
 from python_aws_ssm.parameters import ParameterStore
-from json import dumps
+from json import dumps, loads
 from sys import exit
 from pathlib import Path
 
@@ -39,6 +39,22 @@ def get(key: str) -> None:
     """
     parameters = parameter_store.get_parameters(ssm_key_names=[key])
     print(parameters[key])
+
+
+@cli.command(no_args_is_help=True)
+@click.option("--path", required=True, help="Path to traverse to get all values from")
+def tree(path: str) -> None:
+    """
+    Retrieves all the keys and values under certain path
+    Returns a json object in the format of {"keyN"="value"}
+    """
+    parameters = parameter_store.get_parameters_by_path(
+        ssm_base_path=path, recursive=True, nested=False
+    )
+    tmp = {}
+    for k, v in parameters.items():
+        tmp[k] = loads(v)
+    print(dumps(tmp, indent=4))
 
 
 @cli.command(no_args_is_help=True)
@@ -112,6 +128,6 @@ def put(
 
 cli.add_command(get)
 cli.add_command(put)
-
+cli.add_command(tree)
 if __name__ == "__main__":
     cli()

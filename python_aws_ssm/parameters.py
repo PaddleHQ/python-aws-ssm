@@ -172,7 +172,7 @@ class ParameterStore:
         path: str,
         value: str,
         overwrite: bool = False,
-        tags: Optional[List[Dict[str, str]]] = []
+        tags: Optional[List[Dict[str, str]]] = [],
     ) -> Dict:
         """
         Stores a value in a path
@@ -186,4 +186,3 @@ class ParameterStore:
             Tags=tags,
             Tier="Standard",
         )
-

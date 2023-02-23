@@ -56,6 +56,27 @@ class TestCli(TestCase):
     def __generate_response_ssm_put_parameters(self) -> dict:
         return {"Tier": "Standard", "Version": 1}
 
+    def test_cli_tree(self):
+        """
+        Test the tree argument
+        """
+        fixture = {
+            "xmas-fifth-day": '{"calling-birds": "four", "french-hens": 3, "golden-rings": 5, "partridges": {"count": 1, "location": "a pear tree"}, "turtle-doves": "two"}',
+            "xmas-seventh-day": '{"calling-birds": "four", "french-hens": 3, "golden-rings": 5, "partridges": {"count": 1, "location": "a pear tree"}, "turtle-doves": "two"}',
+            "xmas-sixth-day": '{"calling-birds": "four", "french-hens": 3, "golden-rings": 5, "partridges": {"count": 1, "location": "a pear tree"}, "turtle-doves": "two"}',
+        }
+        fixture_bytes = b'{\n    "xmas-fifth-day": {\n        "calling-birds": "four",\n        "french-hens": 3,\n        "golden-rings": 5,\n        "partridges": {\n            "count": 1,\n            "location": "a pear tree"\n        },\n        "turtle-doves": "two"\n    },\n    "xmas-seventh-day": {\n        "calling-birds": "four",\n        "french-hens": 3,\n        "golden-rings": 5,\n        "partridges": {\n            "count": 1,\n            "location": "a pear tree"\n        },\n        "turtle-doves": "two"\n    },\n    "xmas-sixth-day": {\n        "calling-birds": "four",\n        "french-hens": 3,\n        "golden-rings": 5,\n        "partridges": {\n            "count": 1,\n            "location": "a pear tree"\n        },\n        "turtle-doves": "two"\n    }\n}\n'
+        with patch(
+            "python_aws_ssm.cli.parameter_store.get_parameters_by_path"
+        ) as mocked:
+            mocked.return_value = fixture
+            result = CliRunner().invoke(cli, ["tree", "--path", "/my/tests"])
+            print(mocked.return_value)
+
+        print(result.__dict__)
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.stdout_bytes, fixture_bytes)
+
     def test_cli_get(self):
         """
         Test the get argument with a single key
