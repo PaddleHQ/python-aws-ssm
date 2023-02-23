@@ -186,3 +186,4 @@ class ParameterStore:
             Tags=tags,
             Tier="Standard",
         )
+

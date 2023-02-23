@@ -1,7 +1,9 @@
 import os
+import botocore
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from click.testing import CliRunner
+from pathlib import Path
 from python_aws_ssm.cli import cli
 from python_aws_ssm import __version__
 from python_aws_ssm.parameters import (
@@ -75,7 +77,7 @@ class TestCli(TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertEqual(result.stdout_bytes, b"TEST\n")
 
-    def test_cli_put_value(self):
+    def test_cli_put_value_positive(self):
         """
         Test the put argument with a single value
         """
@@ -89,43 +91,98 @@ class TestCli(TestCase):
         print(result.__dict__)
         self.assertEqual(result.exit_code, 0)
 
-    def test_cli_put_value_exists(self):
+    def test_cli_put_no_value(self):
         """
         Test the put argument with a single value
         """
         with patch(
             "botocore.client.BaseClient._make_api_call",
-            new=self.__generate_response_ssm_put_parameters_exists,
+            new=self.__mock_api_call,
+        ):
+            result = CliRunner().invoke(cli, ["put", "--path", "/my/test/8"])
+
+        print(result.__dict__)
+        self.assertEqual(result.exit_code, -2)
+
+    def test_cli_put_value_exists(self):
+        """
+        Test the put argument with a single value
+        """
+
+        def put_parameter_side_effect(**kwargs):
+            raise botocore.exceptions.ClientError(
+                {
+                    "Error": {
+                        "Code": "ParameterAlreadyExists",
+                        "Message": "The parameter already exists. To overwrite this value, set the overwrite option in the request to true.",
+                    }
+                },
+                "put_parameter",
+            )
+
+        with patch(
+            "python_aws_ssm.cli.parameter_store.put_parameter",
+            side_effect=put_parameter_side_effect,
         ):
             result = CliRunner().invoke(
                 cli, ["put", "--value", "TEST", "--path", "/my/test/8"]
             )
+            self.assertEqual(result.exit_code, -3)
 
-        print(result.__dict__)
-        self.assertEqual(result.exit_code, 0)
-        self.assertEqual(
-            result.stdout_bytes,
-            b"{'__type': 'ParameterAlreadyExists', 'message': 'The parameter already exists. To overwrite this value, set the overwrite option in the request to true.'}\n",
-        )
-
-    
     def test_cli_put_file(self):
         """
         Test the put argument with a single value
         """
-        with patch(
-            "botocore.client.BaseClient._make_api_call"
-        ) as mocked:
-            mocked.return_value={"Tier": "Standard", "Version": 1}
+        fixture = "./tests/fixtures/file.yaml"
+        with patch("botocore.client.BaseClient._make_api_call") as mocked:
+            mocked.return_value = {"Tier": "Standard", "Version": 1}
+
+            result = CliRunner().invoke(cli, ["put", "--path", "/my/test/8", fixture])
+            mocked.assert_called_with(
+                "PutParameter",
+                {
+                    "Name": "/my/test/8",
+                    "Value": Path(fixture).read_text(),
+                    "Type": "String",
+                    "Overwrite": False,
+                    "Tags": [],
+                    "Tier": "Standard",
+                },
+            )
+        self.assertEqual(result.exit_code, 0)
+
+    def test_cli_put_file_node(self):
+        """
+        Test the put argument with a file, converts it to json and only one node
+        """
+        fixture = "./tests/fixtures/file.yaml"
+        with patch("botocore.client.BaseClient._make_api_call") as mocked:
+            mocked.return_value = {"Tier": "Standard", "Version": 1}
 
             result = CliRunner().invoke(
-                cli, ["put", "--path", "/my/test/8", "./projects.yaml"]
+                cli,
+                [
+                    "put",
+                    "--path",
+                    "/my/test/8",
+                    "--to-json",
+                    "--yaml-node",
+                    "xmas-fifth-day",
+                    fixture,
+                ],
             )
-            print(mocked.call_args)
-
-
-        print(result.__dict__)
-        self.assertEqual(result.exit_code, 1)
+            mocked.assert_called_with(
+                "PutParameter",
+                {
+                    "Name": "/my/test/8",
+                    "Value": '{"calling-birds": "four", "french-hens": 3, "golden-rings": 5, "partridges": {"count": 1, "location": "a pear tree"}, "turtle-doves": "two"}',
+                    "Type": "String",
+                    "Overwrite": False,
+                    "Tags": [],
+                    "Tier": "Standard",
+                },
+            )
+        self.assertEqual(result.exit_code, 0)
 
 
 class TestGetParameters(TestCase):

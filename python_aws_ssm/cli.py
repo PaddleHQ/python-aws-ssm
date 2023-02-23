@@ -78,6 +78,10 @@ def put(
     if a yaml node is specified then the content of that node will be stored
     """
 
+    if not file and not value:
+        logging.fatal("Either a value or a file must be specified, exiting")
+        exit(-2)
+
     final_value = value
     if file:
         logging.debug(f"Reading from file: {file}")
@@ -92,9 +96,6 @@ def put(
                 exit(-1)
         if to_json:
             final_value = dumps(final_value)
-    else:
-        logging.fatal("Either a value or a file must be specified, exiting")
-        exit(-2)
 
     try:
         ret = parameter_store.put_parameter(
