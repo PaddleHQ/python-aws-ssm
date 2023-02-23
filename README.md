@@ -208,7 +208,7 @@ Options:
   --help                        Show this message and exit.
   ```
 
-### Get
+#### Get
 ```
 $ aws-ssm-param get
 Usage: aws-ssm-param get [OPTIONS]
@@ -218,4 +218,17 @@ Usage: aws-ssm-param get [OPTIONS]
 Options:
   --key TEXT  Key to get from SSM  [required]
   --help      Show this message and exit.
+```
+
+#### Tree
+```
+aws-ssm-param tree
+Usage: aws-ssm-param tree [OPTIONS]
+
+  Retrieves all the keys and values under certain path 
+  Returns a json object in the format of {"keyN"="value"}
+
+Options:
+  --path TEXT  Path to traverse to get all values from  [required]
+  --help       Show this message and exit.
 ```

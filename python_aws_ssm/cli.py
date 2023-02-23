@@ -46,6 +46,7 @@ def get(key: str) -> None:
 def tree(path: str) -> None:
     """
     Retrieves all the keys and values under certain path
+    
     Returns a json object in the format of {"keyN"="value"}
     """
     parameters = parameter_store.get_parameters_by_path(
