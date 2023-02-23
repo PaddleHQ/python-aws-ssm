@@ -56,14 +56,6 @@ class TestCli(TestCase):
     def __generate_response_ssm_put_parameters(self) -> dict:
         return {"Tier": "Standard", "Version": 1}
 
-    def __generate_response_ssm_put_parameters_exists(
-        self, operation_name: str, kwargs: dict
-    ) -> dict:
-        return {
-            "__type": "ParameterAlreadyExists",
-            "message": "The parameter already exists. To overwrite this value, set the overwrite option in the request to true.",
-        }
-
     def test_cli_get(self):
         """
         Test the get argument with a single key
