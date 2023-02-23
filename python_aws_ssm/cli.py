@@ -42,7 +42,12 @@ def get(key: str) -> None:
 
 
 @cli.command(no_args_is_help=True)
-@click.option("--overwrite/--no-overwrite", default=False, prompt=False,help="Defaults to --no-overwrite")
+@click.option(
+    "--overwrite/--no-overwrite",
+    default=False,
+    prompt=False,
+    help="Defaults to --no-overwrite",
+)
 @click.option(
     "--value", default=None, help="A string to be stored in SSM, limit of 4kb"
 )
@@ -73,9 +78,8 @@ def put(
     if a yaml node is specified then the content of that node will be stored
     """
 
-    if value:
-        final_value = value
-    elif file:
+    final_value = value
+    if file:
         logging.debug(f"Reading from file: {file}")
         final_value = Path(file).read_text()
         # Convert YAML to dictionary and store a node
