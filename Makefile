@@ -4,7 +4,7 @@ setup: ## Create a virtual environment for the project and installs all dependen
 
 .PHONY: format
 format: ## Automatically format the .py files with Black and Isort
-	poetry run isort --recursive .
+	poetry run isort .
 	poetry run black .
 
 .PHONY: lint

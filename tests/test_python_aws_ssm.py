@@ -9,18 +9,18 @@ from python_aws_ssm.parameters import (
 )
 
 
-def test_version():
+def test_version() -> None:
     assert __version__ == "1.0.0"
 
 
 class TestGetParameters(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.parameter_store = ParameterStore(client=MagicMock())
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         pass
 
-    def test_get_parameters_keys_are_mapped(self):
+    def test_get_parameters_keys_are_mapped(self) -> None:
         self.parameter_store.client.get_parameters.return_value = {
             "Parameters": [
                 {"Name": "foo_ssm_key_1", "Value": "foo_ssm_value_1"},
@@ -47,7 +47,7 @@ class TestGetParameters(TestCase):
             WithDecryption=True,
         )
 
-    def test_get_parameters_unknown_keys_are_ignored(self):
+    def test_get_parameters_unknown_keys_are_ignored(self) -> None:
         self.parameter_store.client.get_parameters.return_value = {
             "Parameters": [
                 {"Name": "foo_ssm_key_1", "Value": "foo_ssm_value_1"},
@@ -59,14 +59,15 @@ class TestGetParameters(TestCase):
 
         self.assertEqual({"foo_ssm_key_1": "foo_ssm_value_1"}, secrets)
 
-    def test_get_parameters_aws_errors_are_not_caught(self):
+    def test_get_parameters_aws_errors_are_not_caught(self) -> None:
         expected_error = Exception("Unexpected AWS error!")
         self.parameter_store.client.get_parameters.side_effect = expected_error
 
         with self.assertRaises(Exception, msg="Unexpected AWS error!"):
             self.parameter_store.get_parameters(["/key"])
+            return None
 
-    def test_get_parameters_by_path_keys_are_mapped(self):
+    def test_get_parameters_by_path_keys_are_mapped(self) -> None:
         self.parameter_store.client.get_parameters_by_path.return_value = {
             "Parameters": [
                 {"Name": "/bar/env/foo_ssm_key_1", "Value": "foo_ssm_value_1"},
@@ -84,7 +85,7 @@ class TestGetParameters(TestCase):
             Path="/bar/env/", Recursive=False, WithDecryption=True
         )
 
-    def test_get_parameters_by_path_are_stripped_of_leading_slashes(self):
+    def test_get_parameters_by_path_are_stripped_of_leading_slashes(self) -> None:
         """
         Leading slashes of parameters are stripped consistently.
 
@@ -113,7 +114,7 @@ class TestGetParameters(TestCase):
             Path=parameters_path, Recursive=False, WithDecryption=True
         )
 
-    def test_get_parameters_by_path_recursive_not_nested(self):
+    def test_get_parameters_by_path_recursive_not_nested(self) -> None:
         self.parameter_store.client.get_parameters_by_path.return_value = {
             "Parameters": [
                 {"Name": "/bar/env/foo_ssm_key_1", "Value": "foo_ssm_value_1"},
@@ -136,7 +137,7 @@ class TestGetParameters(TestCase):
             Path="/bar/", Recursive=True, WithDecryption=True
         )
 
-    def test_get_parameters_by_path_recursive_nested(self):
+    def test_get_parameters_by_path_recursive_nested(self) -> None:
         self.parameter_store.client.get_parameters_by_path.return_value = {
             "Parameters": [
                 {"Name": "/bar/env/foo_ssm_key_1", "Value": "foo_ssm_value_1"},
@@ -161,12 +162,12 @@ class TestGetParameters(TestCase):
             Path="/bar/", Recursive=True, WithDecryption=True
         )
 
-    def test_get_parameter_by_path_aws_errors_are_not_caught(self):
+    def test_get_parameter_by_path_aws_errors_are_not_caught(self) -> None:
         expected_error = Exception("Unexpected AWS error!")
         self.parameter_store.client.get_parameters_by_path.side_effect = expected_error
 
         with self.assertRaises(Exception, msg="Unexpected AWS error!"):
-            self.parameter_store.get_parameters_by_path(["/key"])
+            self.parameter_store.get_parameters_by_path("/key")
 
     def test_get_required_parameters_by_path_can_be_asserted(self) -> None:
         """
@@ -190,7 +191,9 @@ class TestGetParameters(TestCase):
         assert len(exc_info.exception.parameter_names) == 2
         assert sorted(exc_info.exception.parameter_names) == sorted(["baz", "foo/bar"])
 
-    def test_required_parameters_by_path_are_checked_before_recursive_nested(self):
+    def test_required_parameters_by_path_are_checked_before_recursive_nested(
+        self,
+    ) -> None:
         self.parameter_store.client.get_parameters_by_path.return_value = {
             "Parameters": [
                 {"Name": "/bar/env/foo_ssm_key_1", "Value": "foo_ssm_value_1"},
@@ -218,7 +221,7 @@ class TestGetParameters(TestCase):
             Path="/bar/", Recursive=True, WithDecryption=True
         )
 
-    def test_requesting_invalid_parameters(self):
+    def test_requesting_invalid_parameters(self) -> None:
         """Assert requesting invalid parameters results in an exception."""
         self.parameter_store.client.get_parameters.return_value = {
             "Parameters": [{"Name": "/test/foo", "Value": "foo_ssm_value_1"}],

@@ -13,16 +13,16 @@ include = [
     "LICENSE",
 ]
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.9"
 boto3 = "^1.9"
 
 [tool.poetry.dev-dependencies]
-pytest = "^3.0"
-mypy = "^0.720.0"
-isort = "^4.3"
-black = "==19.3b0"
-flake8 = "^3.7"
-pytest-cov = "^2.7"
+pytest = "^7.4"
+mypy = "^1.7"
+isort = "^5.12"
+black = "^23.11.0"
+flake8 = "^6.1"
+pytest-cov = "^4.0"
 codecov = "^2.0"
 
 [build-system]
