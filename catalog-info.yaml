@@ -2,9 +2,10 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: python-aws-ssm
+  namespace: paddlehq
   description: Python package that interfaces with AWS System Manager.
   tags:
-    - Python
+    - python
 spec:
   type: library
   owner: engineering
